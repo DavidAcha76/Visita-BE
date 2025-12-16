@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  # Backend API
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: visita-cocha-api
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      MONGODB_URI: ${MONGODB_URI}
+    networks:
+      - visita-cocha-network
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  visita-cocha-network:
+    driver: bridge
+
+# Para desarrollo local con MongoDB
+# Descomenta esto si quieres correr MongoDB en Docker también:
+#
+# services:
+#   mongodb:
+#     image: mongo:7.0
+#     container_name: visita-cocha-mongo
+#     restart: unless-stopped
+#     ports:
+#       - "27017:27017"
+#     environment:
+#       MONGO_INITDB_ROOT_USERNAME: admin
+#       MONGO_INITDB_ROOT_PASSWORD: password123
+#     volumes:
+#       - mongo-data:/data/db
+#     networks:
+#       - visita-cocha-network
+#
+# volumes:
+#   mongo-data:
